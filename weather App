@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather App with Map</title>
+    <!-- Include Leaflet's CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <!-- Include Leaflet's JavaScript -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+    <h1>Weather App with Map</h1>
+
+    <!-- Map container -->
+    <div id="map" style="height: 400px;"></div>
+
+    <!-- Area to display weather data -->
+    <div id="weather-info"></div>
+
+    <!-- JavaScript code for map initialization and fetching weather data -->
+    <script>
+        // Your OpenWeatherMap API key
+        const apiKey = "5543458398649b907afdd470c66c2c1e"; 
+
+        // Initialize the Leaflet map with a default view and zoom level
+        const map = L.map('map').setView([51.505, -0.09], 13); // [latitude, longitude], zoom level
+
+        // Add OpenStreetMap tiles to the map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Function to fetch weather data based on latitude and longitude
+        async function fetchWeather(lat, lon) {
+            const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+
+            try {
+                const response = await fetch(apiUrl); // Fetch weather data
+                if (!response.ok) {
+                    throw new Error("Weather data not found");
+                }
+
+                const data = await response.json(); // Parse the JSON response
+                displayWeather(data); // Display the weather info
+            } catch (error) {
+                console.error("Error fetching weather data:", error); // Log the error
+                alert(error.message); // Display an error message to the user
+            }
+        }
+
+        // Function to display the fetched weather information
+        function displayWeather(data) {
+            const weatherDiv = document.getElementById("weather-info");
+
+            const weatherDetails = `
+                <div>
+                    <h2>Weather in ${data.name}</h2>
+                    <p>Temperature: ${data.main.temp} °C</p>
+                    <p>Weather: ${data.weather[0].description}</p>
+                    <p>Humidity: ${data.main.humidity}%</p>
+                    <p>Wind Speed: ${data.wind.speed} m/s</p>
+                </div>
+            `;
+
+            weatherDiv.innerHTML = weatherDetails; // Insert the weather info into the page
+        }
+
+        // Add an event listener for map clicks to fetch weather data based on coordinates
+        map.on('click', function(event) {
+            const lat = event.latlng.lat; // Get the clicked latitude
+            const lon = event.latlng.lng; // Get the clicked longitude
+            fetchWeather(lat, lon); // Fetch weather data for this location
+        });
+    </script>
+</body>
+</html>
